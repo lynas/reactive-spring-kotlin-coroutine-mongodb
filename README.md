@@ -28,6 +28,16 @@ curl -X GET \
   -H 'Host: localhost:8080' \
   -H 'cache-control: no-cache'
 ```
+### CURL command to get customer by lastName
+
+```
+curl -X GET \
+  http://localhost:8080/customers/Max \
+  -H 'Accept: */*' \
+  -H 'Cache-Control: no-cache' \
+  -H 'Host: localhost:8080' \
+  -H 'cache-control: no-cache'
+```
 
 ### CURL command to add new customer
 
