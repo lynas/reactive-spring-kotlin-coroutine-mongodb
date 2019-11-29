@@ -26,67 +26,55 @@ fun main(args: Array<String>) {
 
 
 @Document
-data class Customer(@Id val id: String? = null, val firstName: String, val lastName: String)
+data class Author(@Id val id: String? = null, val name: String)
+
 @Document
-data class Order(@Id val id: String? = null, val customerId: String, val orderItemName: String)
+data class Book(@Id val id: String? = null, val name: String, val authorId: String)
 
 @Service
-class OrderService(val operation: ReactiveMongoOperations) {
-    suspend fun insert(order: Order): Order? {
-        return operation.insert(order).awaitSingle()
+class BookService(val operations: ReactiveMongoOperations) {
+    suspend fun insert(book: Book): Book? {
+        return operations.insert(book).awaitSingle()
     }
 
-    suspend fun findByCustomerId(customerId: String): List<Order> {
-        return operation.find<Order>(Query(where("customerId").isEqualTo(customerId))).asFlow().toList()
+    suspend fun findByAuthorId(authorId: String): List<Book> {
+        return operations.find<Book>(Query(where("authorId").isEqualTo(authorId))).asFlow().toList()
+    }
+
+    suspend fun findAll(): List<Book> {
+        return operations.findAll<Book>().asFlow().toList()
     }
 }
 
 
 @Service
-class CustomerService(val operation: ReactiveMongoOperations) {
+class AuthorService(val operations: ReactiveMongoOperations) {
 
-    suspend fun insert(customer: Customer): Customer? {
-        return operation.insert(customer).awaitSingle()
-    }
-
-    suspend fun findAll(): List<Customer> {
-        return operation.findAll<Customer>().asFlow().toList()
-    }
-
-    suspend fun findOneById(customerId: String): Customer {
-        return operation.find<Customer>(Query(where("_id").isEqualTo(customerId))).awaitSingle()
-    }
-
-    suspend fun findByLastName(lastName: String): Customer? {
-        return operation.find<Customer>(Query(where("lastName").isEqualTo(lastName))).awaitSingle()
+    suspend fun findByName(name: String): Author? {
+        return operations.find<Author>(Query(where("name").isEqualTo(name))).awaitSingle()
     }
 }
 
 @RestController
-@RequestMapping("/customers")
-class CustomerRestController(val customerService: CustomerService, val orderService: OrderService) {
+@RequestMapping("/books")
+class BookRestController(val bookService: BookService, val authorService: AuthorService) {
 
     @GetMapping
-    suspend fun getAll(): List<Customer> {
-        return customerService.findAll()
-    }
-
-    @GetMapping("/{lastName}")
-    suspend fun getByLastName(@PathVariable lastName: String): Customer? {
-        return customerService.findByLastName(lastName)
+    suspend fun getAll(): List<Book> {
+        return bookService.findAll()
     }
 
     @PostMapping
-    suspend fun addNew(@RequestBody customer: Customer): Customer? {
-        return customerService.insert(customer)
+    suspend fun addNew(@RequestBody book: Book): Book? {
+        return bookService.insert(book)
     }
 
-    @GetMapping("/orders/{customerId}")
-    suspend fun getCustomerOrders(@PathVariable customerId: String): List<Order> {
-        val customer = customerService.findOneById(customerId)
-        return orderService.findByCustomerId(customer.id
-                ?: throw RuntimeException("customer not found with customerId: $customerId"))
-    }
+    @GetMapping("/author-name/{authorName}")
+    suspend fun getBooksByAuthorName(@PathVariable authorName: String): List<Book> {
 
+        val author = authorService.findByName(authorName)
+        return bookService.findByAuthorId(author?.id
+                ?: throw RuntimeException("Author not found with name $authorName"))
+    }
 
 }
