@@ -71,10 +71,9 @@ class BookRestController(val bookService: BookService, val authorService: Author
 
     @GetMapping("/author-name/{authorName}")
     suspend fun getBooksByAuthorName(@PathVariable authorName: String): List<Book> {
-
-        val author = authorService.findByName(authorName)
-        return bookService.findByAuthorId(author?.id
-                ?: throw RuntimeException("Author not found with name $authorName"))
+        val authorId = authorService.findByName(authorName)?.id
+                ?: throw RuntimeException("Author not found with name $authorName")
+        return bookService.findByAuthorId(authorId)
     }
 
 }
