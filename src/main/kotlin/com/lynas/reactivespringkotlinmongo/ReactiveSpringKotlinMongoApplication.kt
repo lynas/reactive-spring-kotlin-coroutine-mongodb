@@ -2,6 +2,7 @@ package com.lynas.reactivespringkotlinmongo
 
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -13,8 +14,10 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.query.Criteria.where
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.isEqualTo
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 
 @SpringBootApplication
@@ -51,7 +54,10 @@ class BookService(val operations: ReactiveMongoOperations) {
 class AuthorService(val operations: ReactiveMongoOperations) {
 
     suspend fun findByName(name: String): Author? {
-        return operations.find<Author>(Query(where("name").isEqualTo(name))).awaitSingle()
+        return operations.find<Author>(Query(where("name").isEqualTo(name)))
+                .awaitFirstOrElse {
+                    throw ResponseStatusException(HttpStatus.NOT_FOUND, "Author not found with name: $name")
+                }
     }
 }
 
