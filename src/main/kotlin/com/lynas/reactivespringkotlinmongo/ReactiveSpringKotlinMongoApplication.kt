@@ -2,7 +2,6 @@ package com.lynas.reactivespringkotlinmongo
 
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitSingle
 import kotlinx.coroutines.runBlocking
@@ -83,14 +82,10 @@ class AuthorService(val operations: ReactiveMongoOperations) {
 class BookRestController(val bookService: BookService, val authorService: AuthorService) {
 
     @GetMapping
-    suspend fun getAll(): List<Book> {
-        return bookService.findAll()
-    }
+    suspend fun getAll() = bookService.findAll()
 
     @PostMapping
-    suspend fun addNew(@RequestBody book: Book): Book {
-        return bookService.insert(book)
-    }
+    suspend fun addNew(@RequestBody book: Book) = bookService.insert(book)
 
     @GetMapping("/author-name/{authorName}")
     suspend fun getBooksByAuthorName(@PathVariable authorName: String): List<Book> {
