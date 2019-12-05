@@ -2,10 +2,14 @@ package com.lynas.reactivespringkotlinmongo
 
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitSingle
+import kotlinx.coroutines.runBlocking
+import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import org.springframework.context.annotation.Bean
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.ReactiveMongoOperations
 import org.springframework.data.mongodb.core.find
@@ -21,7 +25,20 @@ import org.springframework.web.server.ResponseStatusException
 
 
 @SpringBootApplication
-class ReactiveSpringKotlinMongoApplication
+class ReactiveSpringKotlinMongoApplication {
+
+    @Bean
+    fun init(operations: ReactiveMongoOperations) = CommandLineRunner{
+        runBlocking {
+            operations.insert(Book(name = "book1",authorId = "1")).awaitFirst()
+            operations.insert(Book(name = "book2",authorId = "1")).awaitFirst()
+            operations.insert(Book(name = "book3", authorId = "2")).awaitFirst()
+
+            operations.insert(Author(id = "1",name = "author1")).awaitFirst()
+            operations.insert(Author(id = "2",name = "author2")).awaitFirst()
+        }
+    }
+}
 
 fun main(args: Array<String>) {
     runApplication<ReactiveSpringKotlinMongoApplication>(*args)
@@ -36,7 +53,7 @@ data class Book(@Id val id: String? = null, val name: String, val authorId: Stri
 
 @Service
 class BookService(val operations: ReactiveMongoOperations) {
-    suspend fun insert(book: Book): Book? {
+    suspend fun insert(book: Book): Book {
         return operations.insert(book).awaitSingle()
     }
 
@@ -71,7 +88,7 @@ class BookRestController(val bookService: BookService, val authorService: Author
     }
 
     @PostMapping
-    suspend fun addNew(@RequestBody book: Book): Book? {
+    suspend fun addNew(@RequestBody book: Book): Book {
         return bookService.insert(book)
     }
 
