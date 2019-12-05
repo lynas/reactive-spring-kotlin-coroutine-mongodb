@@ -26,6 +26,7 @@ dependencies {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
     testImplementation("io.projectreactor:reactor-test")
+    runtimeOnly("de.flapdoodle.embed:de.flapdoodle.embed.mongo")
 }
 
 tasks.withType<Test> {
