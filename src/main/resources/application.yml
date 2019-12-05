@@ -1,12 +1,12 @@
-spring:
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-      database: testdb
-      username: root
-      password: password
-      authentication-database: admin
-
-server:
-  port: 8899
+#spring:
+#  data:
+#    mongodb:
+#      host: localhost
+#      port: 27017
+#      database: testdb
+#      username: root
+#      password: password
+#      authentication-database: admin
+#
+#server:
+#  port: 8899
